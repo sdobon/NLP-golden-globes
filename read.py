@@ -4,4 +4,5 @@ from pprint import pprint
 with open('gg2015.json') as f:
     data = json.load(f)
 
-pprint(data[0:5])
+for d in data[0:300]:
+    pprint(d['text'])
