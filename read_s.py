@@ -33,18 +33,21 @@ for t in tweets:
         #         print(t)
         #     except:
         #         pass
+
         if not rt.match(t):
             try:
                 print(t)
             except:
                 pass
             proper_nouns = pn2_pat.findall(t)
+        else:
+            proper_nouns = []
         for n in proper_nouns:
             all_proper_nouns.append(n)
 
 
 
 # print(all_proper_nouns)
-print(Counter(all_proper_nouns).most_common(10))
+print(Counter(all_proper_nouns).most_common(30))
 # pprint(host)
 print(len(host))
