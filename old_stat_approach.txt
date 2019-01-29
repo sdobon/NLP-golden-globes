@@ -1,0 +1,19 @@
+# vectorizer = TfidfVectorizer(input="content")#, stop_words="english", max_features=100000)
+# freq_vects = vectorizer.fit_transform(OFFICIAL_AWARDS).toarray()
+# NBclf = GaussianNB().fit(freq_vects, OFFICIAL_AWARDS)
+
+
+# filter_crit = ["cecil", "[Bb]est"]
+# filter_crit_pat = []
+# for c in filter_crit:
+#     filter_crit_pat.append(re.compile(c))
+
+# trans = vectorizer.transform(award_related[:20]).toarray()
+# pred = NBclf.predict(trans)
+#
+
+#
+# for i in range(len(pred)):
+#     print(pred[i])
+#     print(award_related[i])
+#     print("--------------------------------------------------")
