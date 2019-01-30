@@ -138,9 +138,10 @@ for t in win:
 for i in range(len(all_win_pnouns)):
     print(OFFICIAL_AWARDS[i])
     print(Counter(all_win_pnouns[i]).most_common(3))
+    print(answers['award_data'][OFFICIAL_AWARDS[i]]['winner'])
     print("------------------------------------------------")
 
-pprint(answers)
+
 
 
 # BELOW: finding hosts
