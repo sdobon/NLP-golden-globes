@@ -9,7 +9,7 @@ from answers import answers
 # from sklearn.naive_bayes import GaussianNB, MultinomialNB, ComplementNB
 # import numpy as np
 
-with open('gg2015.json') as f:
+with open('gg2013.json') as f:
     data = json.load(f)
 
 tweets = []
