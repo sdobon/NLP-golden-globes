@@ -5,6 +5,9 @@ from nltk import word_tokenize
 from nltk.text import Text
 from pprint import pprint
 
+name_pattern = re.compile(r'\b[A-Z][a-z]*\b(?:\s+[A-Z][a-z]*\b)*')
+
+
 with open('gg2013.json') as f:
     data = json.load(f)
 
@@ -75,4 +78,7 @@ def categorize(text):
             max_count = count
     return max_count - 1
 
+categories = []
+for i in unpunctuated:
+    categories.append(categorize(i.lower()))
         
