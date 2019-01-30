@@ -80,9 +80,9 @@ sorted_awards = sorted(OFFICIAL_AWARDS, key=award_length)
 
 # take the intersection of the tweet and each award, return the name with most matches. ties go to shortest award name (that's why it's sorted)
 def classify(tweet):
-    overlap = [len(tokenize(tweet).intersection(tokenize(a))) for a in sorted_awards]
-    if max(overlap) > 1:
-        return sorted_awards[overlap.index(max(overlap))]
+    num_overlap = [len(tokenize(tweet).intersection(tokenize(a))) for a in sorted_awards]  #array that contains number of overlapping words, mapped to sorted_awards
+    if max(num_overlap) > 1:  #if we're able to match more than one word
+        return sorted_awards[overlap.index(max(num_overlap))]  #grab the first (and thus shortest) award name that matches max(num_overlap) times
     else:
         return None
 
@@ -116,17 +116,16 @@ award_related_pat = re.compile("best.*actress.*television.*drama")
 
 win = []
 
+#append anything matching win_pat to win[]
 for t in tweets:
     low = t.lower()
     if not rt.match(low):
         if win_pat.search(low):
             win.append(t)
 
-all_win_pnouns = [[] for a in OFFICIAL_AWARDS]
-#
-# all_win_pnouns[5].append(pn2_pat.findall('Tina Fey and Lina Kaay'))
 
-# pprint(win)
+#create lists of all PN2s that show up in classified tweets, mapped to award names
+all_win_pnouns = [[] for a in OFFICIAL_AWARDS]
 
 for t in win:
     award = classify(t)
@@ -135,16 +134,18 @@ for t in win:
         for n in proper_nouns:
             all_win_pnouns[OFFICIAL_AWARDS.index(award)].append(n)
 
+
+#print award name, top 3 predictions, then answer from answer key
 for i in range(len(all_win_pnouns)):
     print(OFFICIAL_AWARDS[i])
-    print(Counter(all_win_pnouns[i]).most_common(3))
-    print(answers['award_data'][OFFICIAL_AWARDS[i]]['winner'])
+    print(Counter(all_win_pnouns[i]).most_common(3))  #aggregate PN lists using Counter and show top 3
+    print(answers['award_data'][OFFICIAL_AWARDS[i]]['winner']) #pull from answer key
     print("------------------------------------------------")
 
 
 
 
-# BELOW: finding hosts
+# BELOW: finding hosts------------------------------------
 #
 # all_proper_nouns = []
 # host = []
