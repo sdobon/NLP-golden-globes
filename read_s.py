@@ -9,7 +9,7 @@ from answers import answers
 # from sklearn.naive_bayes import GaussianNB, MultinomialNB, ComplementNB
 # import numpy as np
 
-with open('gg2013.json') as f:
+with open('gg2015.json') as f:
     data = json.load(f)
 
 tweets = []
@@ -62,7 +62,7 @@ OFFICIAL_AWARDS = ['cecil b. demille award', 'best motion picture - drama', 'bes
 def tokenize(str):
     punctuation = re.compile(r'[^\w\s]')
     unpunctuated = re.sub(punctuation,'',str)
-    return set(re.sub("television", 'tv', unpunctuated).split())
+    return set(re.sub("television", 'tv', unpunctuated).lower().split())
 
 def award_length(a):
     words = set()
@@ -82,7 +82,7 @@ sorted_awards = sorted(OFFICIAL_AWARDS, key=award_length)
 def classify(tweet):
     num_overlap = [len(tokenize(tweet).intersection(tokenize(a))) for a in sorted_awards]  #array that contains number of overlapping words, mapped to sorted_awards
     if max(num_overlap) > 1:  #if we're able to match more than one word
-        return sorted_awards[overlap.index(max(num_overlap))]  #grab the first (and thus shortest) award name that matches max(num_overlap) times
+        return sorted_awards[num_overlap.index(max(num_overlap))]  #grab the first (and thus shortest) award name that matches max(num_overlap) times
     else:
         return None
 
@@ -134,13 +134,17 @@ for t in win:
         for n in proper_nouns:
             all_win_pnouns[OFFICIAL_AWARDS.index(award)].append(n)
 
-
+correct = 0
 #print award name, top 3 predictions, then answer from answer key
 for i in range(len(all_win_pnouns)):
     print(OFFICIAL_AWARDS[i])
     print(Counter(all_win_pnouns[i]).most_common(3))  #aggregate PN lists using Counter and show top 3
     print(answers['award_data'][OFFICIAL_AWARDS[i]]['winner']) #pull from answer key
     print("------------------------------------------------")
+    if Counter(all_win_pnouns[i]).most_common(3)[0][0].lower()==answers['award_data'][OFFICIAL_AWARDS[i]]['winner']:
+        correct += 1
+
+print("Correctly extracting " + str(correct) + " of " + str(len(OFFICIAL_AWARDS)) + " awards")
 
 
 
