@@ -1,3 +1,8 @@
+
+# from sklearn.feature_extraction.text import TfidfVectorizer, CountVectorizer
+# from sklearn.naive_bayes import GaussianNB, MultinomialNB, ComplementNB
+# import numpy as np
+
 # vectorizer = TfidfVectorizer(input="content")#, stop_words="english", max_features=100000)
 # freq_vects = vectorizer.fit_transform(OFFICIAL_AWARDS).toarray()
 # NBclf = GaussianNB().fit(freq_vects, OFFICIAL_AWARDS)
