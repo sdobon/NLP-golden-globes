@@ -18,14 +18,12 @@ tweets = list(set(tweets))
 OFFICIAL_AWARDS = ['cecil b. demille award', 'best motion picture - drama', 'best performance by an actress in a motion picture - drama', 'best performance by an actor in a motion picture - drama', 'best motion picture - comedy or musical', 'best performance by an actress in a motion picture - comedy or musical', 'best performance by an actor in a motion picture - comedy or musical', 'best animated feature film', 'best foreign language film', 'best performance by an actress in a supporting role in a motion picture', 'best performance by an actor in a supporting role in a motion picture', 'best director - motion picture', 'best screenplay - motion picture', 'best original score - motion picture', 'best original song - motion picture', 'best television series - drama', 'best performance by an actress in a television series - drama', 'best performance by an actor in a television series - drama', 'best television series - comedy or musical', 'best performance by an actress in a television series - comedy or musical', 'best performance by an actor in a television series - comedy or musical', 'best mini-series or motion picture made for television', 'best performance by an actress in a mini-series or motion picture made for television', 'best performance by an actor in a mini-series or motion picture made for television', 'best performance by an actress in a supporting role in a series, mini-series or motion picture made for television', 'best performance by an actor in a supporting role in a series, mini-series or motion picture made for television']
 
 
-
-
 #-----------------------------------------------------------------------------------------------
 
 def tokenize(str):
     punctuation = re.compile(r'[^\w\s]')
     unpunctuated = re.sub(punctuation,'',str)
-    return set(re.sub("television", 'tv', unpunctuated).lower().split())
+    return set([x for x in re.sub("television", 'tv', unpunctuated).lower().split() if not len(x)<4])
 
 def award_length(a):
     words = set()
@@ -72,13 +70,14 @@ def classify(tweet):
 #-----------------------------------------------------------------------------------------------
 
 host_pat = re.compile(" [Hh]ost")
-win_pat = re.compile("w[io]n")
+win_pat = re.compile("w[io]n|takes")
 pn2_pat= re.compile("[A-Z][a-z]+ [A-Z][a-z]+")
 rt = re.compile("rt")
 award_related_pat = re.compile("best.*actress.*television.*drama")
+act_pat = re.compile("act")
 
 name_pattern = re.compile(r'\b[A-Z][a-z]+\b(?:\s+[A-Z][a-z]*\b)*')
-pnx_pat= re.compile(r'\b[A-Z]\S*\b(?:\s+[A-Z]\S*\b)*')
+pnx_pat= re.compile(r'\b[A-Z]\S+\b(?:\s+[A-Z]\S*\b)*')
 
 win = []
 
@@ -95,8 +94,14 @@ all_win_pnouns = [[] for a in OFFICIAL_AWARDS]
 
 for t in win:
     award = classify(t)
+    if award == OFFICIAL_AWARDS[-1]:
+        print(t)
+        print('-------------')
     if award:
-        proper_nouns = pnx_pat.findall(t)
+        if act_pat.search(award):
+            proper_nouns = pn2_pat.findall(t)
+        else:
+            proper_nouns = name_pattern.findall(t)
         for n in proper_nouns:
             all_win_pnouns[OFFICIAL_AWARDS.index(award)].append(n)
 
