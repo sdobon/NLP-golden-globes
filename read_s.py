@@ -19,11 +19,15 @@ OFFICIAL_AWARDS = ['cecil b. demille award', 'best motion picture - drama', 'bes
 
 
 #-----------------------------------------------------------------------------------------------
+punctuation = re.compile(r'[^\w\s]')
 
 def tokenize(str):
-    punctuation = re.compile(r'[^\w\s]')
+    str = str.lower()
     unpunctuated = re.sub(punctuation,'',str)
-    return set([x for x in re.sub("television", 'tv', unpunctuated).lower().split() if not len(x)<4])
+
+    return set([x for x in re.sub('tv', "television", unpunctuated).split() if not len(x)<4])
+
+
 
 def award_length(a):
     words = set()
@@ -94,9 +98,9 @@ all_win_pnouns = [[] for a in OFFICIAL_AWARDS]
 
 for t in win:
     award = classify(t)
-    if award == OFFICIAL_AWARDS[-1]:
-        print(t)
-        print('-------------')
+    # if award == OFFICIAL_AWARDS[-1]:
+    #     print(t)
+    #     print('-------------')
     if award:
         if act_pat.search(award):
             proper_nouns = pn2_pat.findall(t)
@@ -109,11 +113,13 @@ correct = 0
 #print award name, top 3 predictions, then answer from answer key
 for i in range(len(all_win_pnouns)):
     print(OFFICIAL_AWARDS[i])
-    print(Counter(all_win_pnouns[i]).most_common(3))  #aggregate PN lists using Counter and show top 3
-    print(answers['award_data'][OFFICIAL_AWARDS[i]]['winner']) #pull from answer key
-    print("------------------------------------------------")
     if Counter(all_win_pnouns[i]).most_common(3)[0][0].lower()==answers['award_data'][OFFICIAL_AWARDS[i]]['winner']:
         correct += 1
+    else:
+        print(Counter(all_win_pnouns[i]).most_common(5))  #aggregate PN lists using Counter and show top 3
+    print(answers['award_data'][OFFICIAL_AWARDS[i]]['winner']) #pull from answer key
+    print("------------------------------------------------")
+
 
 print("Correctly extracting " + str(correct) + " of " + str(len(OFFICIAL_AWARDS)) + " awards")
 
