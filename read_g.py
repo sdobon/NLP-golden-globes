@@ -62,6 +62,7 @@ def tokenize2(str):
     #return set([x for x in re.sub("television", 'tv', unpunctuated).lower().split() if not len(x)<4])
 def tokenize(str):
     str = str.lower()
+    punctuation = re.compile(r'[^\w\s]')
     unpunctuated = re.sub(punctuation,'',str)
 
     return set([x for x in re.sub('tv', "television", unpunctuated).split() if not len(x)<4])
@@ -137,8 +138,7 @@ all_win_pnouns = [[] for a in OFFICIAL_AWARDS]
 
 for t in win:
     award = classify(t)
-    if award == OFFICIAL_AWARDS[OFFICIAL_AWARDS.index('best original score - motion picture')]:
-        print(t)
+    if award:
         if act_pat.search(award):
             proper_nouns = pn2_pat.findall(t)
         else:
@@ -146,7 +146,8 @@ for t in win:
             proper_nouns += name_with_lower.findall(t)
         for n in proper_nouns:
             all_win_pnouns[OFFICIAL_AWARDS.index(award)].append(n)
-#
+
+correct = 0
 for i in range(len(all_win_pnouns)):
     print(OFFICIAL_AWARDS[i])
     if Counter(all_win_pnouns[i]).most_common(3)[0][0].lower()==answers['award_data'][OFFICIAL_AWARDS[i]]['winner']:
