@@ -24,8 +24,9 @@ punctuation = re.compile(r'[^\w\s]')
 def tokenize(str):
     str = str.lower()
     unpunctuated = re.sub(punctuation,'',str)
+    tv_sub = re.sub('tv', "television", unpunctuated)
 
-    return set([x for x in re.sub('tv', "television", unpunctuated).split() if not len(x)<4])
+    return set([x for x in tv_sub.split() if not len(x)<4])
 
 
 
@@ -40,7 +41,7 @@ def award_length(a):
 
 sorted_awards = sorted(OFFICIAL_AWARDS, key=award_length)
 
-# print([len(tokenize(a)) for a in sorted_awards])
+print([len(tokenize(a)) for a in sorted_awards])
 
 
 # take the intersection of the tweet and each award, return the name with most matches. ties go to shortest award name (that's why it's sorted)
@@ -75,13 +76,31 @@ def classify(tweet):
 
 host_pat = re.compile(" [Hh]ost")
 win_pat = re.compile("w[io]n|takes")
-pn2_pat= re.compile("[A-Z][a-z]+ [A-Z][a-z]+")
+pn2_pat= re.compile("[A-Z][a-z]+ [A-Z]\S+")
 rt = re.compile("rt")
 award_related_pat = re.compile("best.*actress.*television.*drama")
 act_pat = re.compile("act")
 
-name_pattern = re.compile(r'\b[A-Z][a-z]+\b(?:\s+[A-Z][a-z]*\b)*')
+name_pattern = re.compile(r'\b[A-Z][a-z]*\b(?:\s+[A-Z][a-z]*\b)*')
+name_with_lower = re.compile(r'\b[A-Z][a-z]*\b(?:\s+[a-z]*\b){0,2}(?:\s+[A-Z][a-z]*\b)+')
 pnx_pat= re.compile(r'\b[A-Z]\S+\b(?:\s+[A-Z]\S*\b)*')
+
+# test_pat = re.compile("test|best|actor|", re.IGNORECASE)
+# print(tokenize(re.sub(test_pat, '', "the Best friggin actor on tv")))
+
+#--------Generate paterns to remove award names from classfied tweets--------------------
+
+removal_patterns = []
+
+for a in OFFICIAL_AWARDS:
+    pat_str = ""
+    for w in tokenize(a):
+        pat_str += w + "|"
+    rem_pat = re.compile(pat_str[:-1], re.IGNORECASE)
+    removal_patterns.append(rem_pat)
+
+
+#----------------------------------------------------------------------------------------
 
 win = []
 
@@ -98,14 +117,18 @@ all_win_pnouns = [[] for a in OFFICIAL_AWARDS]
 
 for t in win:
     award = classify(t)
-    # if award == OFFICIAL_AWARDS[-1]:
+    # if award == OFFICIAL_AWARDS[13]:
     #     print(t)
+    #     print(name_pattern.findall(t))
+    #     print(name_with_lower.findall(t))
     #     print('-------------')
     if award:
+        name_removed_t = re.sub(removal_patterns[OFFICIAL_AWARDS.index(award)], '', t)
         if act_pat.search(award):
-            proper_nouns = pn2_pat.findall(t)
+            proper_nouns = pn2_pat.findall(name_removed_t)
         else:
-            proper_nouns = name_pattern.findall(t)
+            proper_nouns = name_pattern.findall(name_removed_t)
+            proper_nouns += name_with_lower.findall(name_removed_t)
         for n in proper_nouns:
             all_win_pnouns[OFFICIAL_AWARDS.index(award)].append(n)
 
