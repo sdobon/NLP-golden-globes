@@ -15,29 +15,29 @@ for d in data:
 
 tweets = list(set(tweets))
 
-OFFICIAL_AWARDS = ['cecil b. demille award', 
-                   'best motion picture - drama', 
-                   'best performance by an actress in a motion picture - drama', 
-                   'best performance by an actor in a motion picture - drama', 
-                   'best motion picture - comedy or musical', 
-                   'best performance by an actress in a motion picture - comedy or musical', 
-                   'best performance by an actor in a motion picture - comedy or musical', 
-                   'best animated feature film', 'best foreign language film', 
-                   'best performance by an actress in a supporting role in a motion picture', 
-                   'best performance by an actor in a supporting role in a motion picture', 
-                   'best director - motion picture', 'best screenplay - motion picture', 
-                   'best original score - motion picture', 
-                   'best original song - motion picture', 
-                   'best television series - drama', 
-                   'best performance by an actress in a television series - drama', 
-                   'best performance by an actor in a television series - drama', 
-                   'best television series - comedy or musical', 
-                   'best performance by an actress in a television series - comedy or musical', 
-                   'best performance by an actor in a television series - comedy or musical', 
-                   'best mini-series or motion picture made for television', 
-                   'best performance by an actress in a mini-series or motion picture made for television', 
-                   'best performance by an actor in a mini-series or motion picture made for television', 
-                   'best performance by an actress in a supporting role in a series, mini-series or motion picture made for television', 
+OFFICIAL_AWARDS = ['cecil b. demille award',
+                   'best motion picture - drama',
+                   'best performance by an actress in a motion picture - drama',
+                   'best performance by an actor in a motion picture - drama',
+                   'best motion picture - comedy or musical',
+                   'best performance by an actress in a motion picture - comedy or musical',
+                   'best performance by an actor in a motion picture - comedy or musical',
+                   'best animated feature film', 'best foreign language film',
+                   'best performance by an actress in a supporting role in a motion picture',
+                   'best performance by an actor in a supporting role in a motion picture',
+                   'best director - motion picture', 'best screenplay - motion picture',
+                   'best original score - motion picture',
+                   'best original song - motion picture',
+                   'best television series - drama',
+                   'best performance by an actress in a television series - drama',
+                   'best performance by an actor in a television series - drama',
+                   'best television series - comedy or musical',
+                   'best performance by an actress in a television series - comedy or musical',
+                   'best performance by an actor in a television series - comedy or musical',
+                   'best mini-series or motion picture made for television',
+                   'best performance by an actress in a mini-series or motion picture made for television',
+                   'best performance by an actor in a mini-series or motion picture made for television',
+                   'best performance by an actress in a supporting role in a series, mini-series or motion picture made for television',
                    'best performance by an actor in a supporting role in a series, mini-series or motion picture made for television']
 
 
@@ -58,7 +58,7 @@ def tokenize2(str):
             if i == "motion picture": processed.append("movie")
             if i == "movie": processed.append("motion picture")
     return set(processed)
-    
+
     #return set([x for x in re.sub("television", 'tv', unpunctuated).lower().split() if not len(x)<4])
 def tokenize(str):
     str = str.lower()
@@ -156,6 +156,8 @@ for i in range(len(all_win_pnouns)):
         print(Counter(all_win_pnouns[i]).most_common(5))  #aggregate PN lists using Counter and show top 3
     print(answers['award_data'][OFFICIAL_AWARDS[i]]['winner']) #pull from answer key
     print("------------------------------------------------")
+
+print("Correctly extracting " + str(correct) + " of " + str(len(OFFICIAL_AWARDS)) + " awards")
 
 #correct = 0
 ##print award name, top 3 predictions, then answer from answer key
