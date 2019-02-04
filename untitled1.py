@@ -133,4 +133,5 @@ def classify(tweet):
     
     
 answers = [classify(i) for i in best_split]
-print(len(set(answers)))    
+print('the number of distinct awards returned: ')
+print(len(set(answers)) - 1)    
