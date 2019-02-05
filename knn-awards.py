@@ -148,13 +148,17 @@ for i in no_space:
 # NEW STUFF HERE
 answers = []
 def ans_loop(answers):    
+    # this line gives us the tdidf vectorizer, has some parameters that you can change like use_idf
     vectorizer = TfidfVectorizer(use_idf=False, stop_words='english')
+    # you can try putting in different data corpuses instead of best_split
     X = vectorizer.fit_transform(best_split)
-
+    
+    # true_k is the k-means number
     true_k = 30
     model = KMeans(n_clusters=true_k, init='k-means++', max_iter=100, n_init=1)
     model.fit(X)
     
+    # you can uncomment the prints to see whats going on
     #print("Top terms per cluster:")
     order_centroids = model.cluster_centers_.argsort()[:, ::-1]
     terms = vectorizer.get_feature_names()
@@ -162,12 +166,14 @@ def ans_loop(answers):
     for i in range(true_k):
         #print("Cluster %d:" % i),
         s = ''
+        # you can change the number '15' to change how many of the top words in each cluster to include
         for ind in order_centroids[i, :15]:
             #print(' %s' % terms[ind])
             s += ' ' + terms[ind]
         ans.append(s)
         
     ans2 = []
+    # this step is just processing out the non-award related words by filtering through things that appear in no_space
     for i in ans:
         t = ''
         for j in i.split():
