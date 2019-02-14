@@ -140,7 +140,7 @@ for i in range(len(all_win_pnouns)):
         correct += 1
     else:
         print(Counter(all_win_pnouns[i]).most_common(5))  #aggregate PN lists using Counter and show top 3
-    print(answers['award_data'][OFFICIAL_AWARDS[i]]['winner']) #pull from answer key
+    print(len(answers['award_data'][OFFICIAL_AWARDS[i]]['presenters'])) #pull from answer key
     print("------------------------------------------------")
 
 

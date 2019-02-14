@@ -27,31 +27,31 @@ for d in data:
 
 tweets = list(set(tweets))
 
-OFFICIAL_AWARDS = ['cecil b. demille award', 
-                   'best motion picture - drama', 
-                   'best performance by an actress in a motion picture - drama', 
-                   'best performance by an actor in a motion picture - drama', 
-                   'best motion picture - comedy or musical', 
-                   'best performance by an actress in a motion picture - comedy or musical', 
-                   'best performance by an actor in a motion picture - comedy or musical', 
-                   'best animated feature film', 
-                   'best foreign language film', 
-                   'best performance by an actress in a supporting role in a motion picture', 
-                   'best performance by an actor in a supporting role in a motion picture', 
-                   'best director - motion picture', 
-                   'best screenplay - motion picture', 
-                   'best original score - motion picture', 
-                   'best original song - motion picture', 
-                   'best television series - drama', 
-                   'best performance by an actress in a television series - drama', 
-                   'best performance by an actor in a television series - drama', 
-                   'best television series - comedy or musical', 
-                   'best performance by an actress in a television series - comedy or musical', 
-                   'best performance by an actor in a television series - comedy or musical', 
-                   'best mini-series or motion picture made for television', 
-                   'best performance by an actress in a mini-series or motion picture made for television', 
-                   'best performance by an actor in a mini-series or motion picture made for television', 
-                   'best performance by an actress in a supporting role in a series, mini-series or motion picture made for television', 
+OFFICIAL_AWARDS = ['cecil b. demille award',
+                   'best motion picture - drama',
+                   'best performance by an actress in a motion picture - drama',
+                   'best performance by an actor in a motion picture - drama',
+                   'best motion picture - comedy or musical',
+                   'best performance by an actress in a motion picture - comedy or musical',
+                   'best performance by an actor in a motion picture - comedy or musical',
+                   'best animated feature film',
+                   'best foreign language film',
+                   'best performance by an actress in a supporting role in a motion picture',
+                   'best performance by an actor in a supporting role in a motion picture',
+                   'best director - motion picture',
+                   'best screenplay - motion picture',
+                   'best original score - motion picture',
+                   'best original song - motion picture',
+                   'best television series - drama',
+                   'best performance by an actress in a television series - drama',
+                   'best performance by an actor in a television series - drama',
+                   'best television series - comedy or musical',
+                   'best performance by an actress in a television series - comedy or musical',
+                   'best performance by an actor in a television series - comedy or musical',
+                   'best mini-series or motion picture made for television',
+                   'best performance by an actress in a mini-series or motion picture made for television',
+                   'best performance by an actor in a mini-series or motion picture made for television',
+                   'best performance by an actress in a supporting role in a series, mini-series or motion picture made for television',
                    'best performance by an actor in a supporting role in a series, mini-series or motion picture made for television']
 
 def tokenize(str):
@@ -109,7 +109,7 @@ for t in tweets:
         if win_pat.search(low):
             #punctuation = re.compile(r'[^\w\s]')
             win.append(t)
-    
+
 
 # pre-processing, you can type in each of the list names to see exactly what's being pulled out
 best_split = []
@@ -117,6 +117,8 @@ for i in tweets:
     split = re.compile(r'wins best').split(i)
     if len(split) > 1:
         best_split.append(split[1])
+
+print(best_split)
 
 end_split = []
 for i in best_split:
@@ -140,24 +142,24 @@ for i in no_space:
 
 
 
-    
+
 
 
 
 # -----------------------------------------------------------
 # NEW STUFF HERE
 answers = []
-def ans_loop(answers):    
+def ans_loop(answers):
     # this line gives us the tdidf vectorizer, has some parameters that you can change like use_idf
     vectorizer = TfidfVectorizer(use_idf=False, stop_words='english')
     # you can try putting in different data corpuses instead of best_split
     X = vectorizer.fit_transform(best_split)
-    
+
     # true_k is the k-means number
     true_k = 30
     model = KMeans(n_clusters=true_k, init='k-means++', max_iter=100, n_init=1)
     model.fit(X)
-    
+
     # you can uncomment the prints to see whats going on
     #print("Top terms per cluster:")
     order_centroids = model.cluster_centers_.argsort()[:, ::-1]
@@ -171,7 +173,7 @@ def ans_loop(answers):
             #print(' %s' % terms[ind])
             s += ' ' + terms[ind]
         ans.append(s)
-        
+
     ans2 = []
     # this step is just processing out the non-award related words by filtering through things that appear in no_space
     for i in ans:
@@ -180,7 +182,7 @@ def ans_loop(answers):
             if j.lower() in words:
                 t += ' ' + j
         ans2.append(t)
-    
+
     answers += [classify(i) for i in ans2]
     len(set(answers))
 
