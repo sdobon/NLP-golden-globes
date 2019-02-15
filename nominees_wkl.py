@@ -79,56 +79,83 @@ def classify(tweet):
 
 host_pat = re.compile(" [Hh]ost")
 win_pat = re.compile("w[io]n|takes")
-pn2_pat= re.compile("[A-Z][a-z]+ [A-Z]\S+")
+pn2_pat= re.compile("(?!Best)(?!Golden)(?!Globes)(?!Supporting)(?!Actor)(?!Actress)(?!Cecil)[A-Z][a-z]+ [A-Z]\S+")
 rt = re.compile("rt")
 award_related_pat = re.compile("best.*actress.*television.*drama")
 act_pat = re.compile("act")
 
-name_pattern = re.compile(r'\b[A-Z][a-z]*\b(?:\s+[A-Z][a-z]*\b)*')
-name_with_lower = re.compile(r'\b[A-Z][a-z]*\b(?:\s+[a-z]*\b){1,2}(?:\s+[A-Z][a-z]*\b)+')
+name_pattern = re.compile(r'\b(?!Best)[A-Z][a-z]*\b(?:\s+[A-Z][a-z]*\b)*')
+name_with_lower = re.compile(r'\b(?!Best)[A-Z][a-z]*\b(?:\s+[a-z]*\b){1,2}(?:\s+[A-Z][a-z]*\b)+')
 pnx_pat= re.compile(r'\b[A-Z]\S+\b(?:\s+[A-Z]\S*\b)*')
 
-nominee_pat = re.compile("[Nn]omin")
+nominee_pat = re.compile("[Dd]idn't win|Did not win|didn't get|did not get|[Nn]ominee|[Nn]ominated|[Nn]omination")
+# was\s[Nn]ominated|get[Nn]omin"
 # for t in tweets:
 #     print t
 #     print("\n")
 
-win = []
+nominee = []
 
-#append anything matching win_pat to win[]
+#append anything matching nominee_pat to nominee[]
 for t in tweets:
     low = t.lower()
     if not rt.match(low):
-        if nominee_pat.search(low):
+        if (nominee_pat.search(low) or win_pat.search(low)):
             #punctuation = re.compile(r'[^\w\s]')
-            win.append(t)
+            nominee.append(t)
 
 
 #create lists of all PN2s that show up in classified tweets, mapped to award names
-all_win_pnouns = [[] for a in OFFICIAL_AWARDS]
+all_nominee_pnouns = [[] for a in OFFICIAL_AWARDS]
+#print all_nominee_pnouns
 
-for t in win:
+# Return array of names only!
+def find_names_only(list_of_pronouns):
+    names_array = []
+    stringified_pronouns = [i.encode("utf-8") for i in list_of_pronouns]
+    for pronoun in stringified_pronouns:
+        if ((nltk.pos_tag(nltk.word_tokenize(pronoun))[0][1] == "NNP") and (nltk.pos_tag(nltk.word_tokenize(pronoun))[1][1] == "NNP")):
+            names_array.append(pronoun)
+    return list(set(names_array))
+
+# test_pronouns = [u'Is Ben Affleck', u'Matt Damon', u'Affleck', u'Picture', u'Director', u'Matt Damon', u'Affleck just won Best Picture', u'Director while Matt Damon']
+# print "CHECK (Matt Damon only): ", find_names_only(test_pronouns)
+
+
+# Classify the nominee-related tweets by their awards, and
+# infer the names in these same tweets
+for t in nominee:
     award = classify(t)
-    print award
-    print t
-    print "\n"
+    # Recall: classify function returns None if no award matches
     if award:
+        # print "Tweet: ", t
+        # print "Award label: ", award
+        # if the award has to do with an actor...
         if act_pat.search(award):
             proper_nouns = pn2_pat.findall(t)
+            # print ("no....")
+            # print proper_nouns
+            proper_nouns = find_names_only(proper_nouns)
+        # if the award doesn't have to do with an actor...
         else:
             proper_nouns = name_pattern.findall(t)
             proper_nouns += name_with_lower.findall(t)
-        for n in proper_nouns:
-            all_win_pnouns[OFFICIAL_AWARDS.index(award)].append(n)
+        # print "Pronouns found: ", proper_nouns
 
+        # print "\n"
+        for n in proper_nouns:
+            all_nominee_pnouns[OFFICIAL_AWARDS.index(award)].append(n)
+
+print ("******************************************")
 correct = 0
-# for i in range(len(all_win_pnouns)):
-#     # print(OFFICIAL_AWARDS[i])
-#     # if Counter(all_win_pnouns[i]).most_common(3)[0][0].lower()==answers['award_data'][OFFICIAL_AWARDS[i]]['nominees']:
-#     #     correct += 1
-#     # else:
-#     print(Counter(all_win_pnouns[i]).most_common(3))  #aggregate PN lists using Counter and show top 3
-#     print(answers['award_data'][OFFICIAL_AWARDS[i]]['nominees']) #pull from answer key
-#     print("------------------------------------------------")
+for i in range(len(all_nominee_pnouns)):
+    # print(OFFICIAL_AWARDS[i])
+    # if Counter(all_nominee_pnouns[i]).most_common(3)[0][0].lower()==answers['award_data'][OFFICIAL_AWARDS[i]]['nominees']:
+    #     correct += 1
+    # else:
+    print "Award: ", OFFICIAL_AWARDS[i]
+    print "Our answer: ", (Counter(all_nominee_pnouns[i]).most_common(10))  #aggregate PN lists using Counter and show top 3
+    print "Desired answer:", (answers['award_data'][OFFICIAL_AWARDS[i]]['nominees']) #pull from answer key
+    print("------------------------------------------------")
 
 # print("Correctly extracting " + str(correct) + " of " + str(len(OFFICIAL_AWARDS)) + " awards")
