@@ -27,8 +27,9 @@ def voodoo_magic(year, OFFICIAL_AWARDS):
 
 
     results = {}
+    results['award_data'] = {}
     for a in OFFICIAL_AWARDS:
-        results[a] = {}
+        results['award_data'][a] = {}
 
     #------ Helper Functions --------------------------------------------------------------------------------------
     punctuation = re.compile(r'[^\w\s]')
@@ -98,6 +99,8 @@ def voodoo_magic(year, OFFICIAL_AWARDS):
     # print(merge_overlap("actor tv", "best actor"))
 
     def construct_name(lst):
+        if len(lst) == 0:
+            return None
         s = lst.pop(0)
         for ng in lst:
             merge = merge_overlap(s, ng)
@@ -215,9 +218,11 @@ def voodoo_magic(year, OFFICIAL_AWARDS):
     awards = []
 
     for c in clusters:
+        name = construct_name( [ng[0] for ng in get_top_ngrams(c, 10) if ng[1]>5] )
         # print(get_top_ngrams(c, 10))
-        awards.append(construct_name( [ng[0] for ng in get_top_ngrams(c, 10) if ng[1]>5] ))
-        print("-----------------------")
+        if name:
+            awards.append(name)
+            print("-----------------------")
 
     print(awards)
     print(len(set(awards)))
@@ -265,7 +270,7 @@ def voodoo_magic(year, OFFICIAL_AWARDS):
     #print award name, top 3 predictions, then answer from answer key
     for i in range(len(all_win_pnouns)):
         print(OFFICIAL_AWARDS[i])
-        results[OFFICIAL_AWARDS[i]]['winner'] = Counter(all_win_pnouns[i]).most_common(3)[0][0].lower()
+        results['award_data'][OFFICIAL_AWARDS[i]]['winner'] = Counter(all_win_pnouns[i]).most_common(3)[0][0].lower()
         if Counter(all_win_pnouns[i]).most_common(3)[0][0].lower()==answers['award_data'][OFFICIAL_AWARDS[i]]['winner']:
             correct += 1
         else:
@@ -280,4 +285,4 @@ def voodoo_magic(year, OFFICIAL_AWARDS):
     pprint(results)
     return results
 
-voodoo_magic('2013', OFFICIAL_AWARDS_13)
+# voodoo_magic('2013', OFFICIAL_AWARDS_13)
