@@ -81,77 +81,143 @@ def classify(tweet):
     else:
         return None
 
+
+def get_top_ngrams(corpus, n=None):
+
+    vec = CountVectorizer(ngram_range=(2,5)).fit(corpus)
+    raw_freq = vec.transform(corpus)
+    sum_words = raw_freq.sum(axis=0)
+    words_freq = [(word, sum_words[0, idx]) for word, idx in vec.vocabulary_.items()]
+    words_freq =sorted(words_freq, key = lambda x: x[1], reverse=True)
+    return words_freq[:n]
+
+# corp = ["i love to code in python", "everyone loves to code in python", "well, people who don't know how to code don't"]
+# print(get_top_ngrams(corp, 2))
+
+def merge_overlap(a, b):
+    c = a.split()
+    d = b.split()
+    if c[-1] == d[0]:
+        final = c + d[1:]
+    elif d[-1] == c[0]:
+        final = d + c[1:]
+    else:
+        return None
+    s = ''
+    for w in final:
+        s += w + ' '
+    return s[:-1]
+
+# print(merge_overlap("best actor", "actor tv"))
+# print(merge_overlap("actor tv", "best actor"))
+
+def construct_name(lst):
+    s = lst.pop(0)
+    for ng in lst:
+        merge = merge_overlap(s, ng)
+        if merge:
+            lst.remove(ng)
+            return construct_name( [merge] + lst)
+    return s
+
+# print(construct_name(['best supporting', 'supporting actor','best supporting actor', 'actor in', 'supporting actor in', 'in drama']))
+
+
 #---------------------------------------------------------------------------------
 
-win_pat = re.compile("[Ww]in|[Ww]on |[Tt]akes|[Nn]omin|[Pp]resent|[In]ntrodu|[Cc]ongrat|[Bb]est ")
-rt = re.compile("rt")
+# # win_pat = re.compile("[Ww]in|[Ww]on |[Tt]akes|[Nn]omin|[Pp]resent|[In]ntrodu|[Cc]ongrat|[Bb]est ")
+# win_pat = re.compile("[Bb]est ")
+# rt = re.compile("rt")
+#
+# win = []
+# for t in tweets:
+#     low = t.lower()
+#     if not rt.match(low):
+#         if win_pat.search(low):
+#             #punctuation = re.compile(r'[^\w\s]')
+#             win.append(t)
 
-win = []
-for t in tweets:
-    low = t.lower()
-    if not rt.match(low):
-        if win_pat.search(low):
-            #punctuation = re.compile(r'[^\w\s]')
-            win.append(t)
+end_pat = re.compile(r' for | at |\.|:|#|!')
+wins_best = re.compile(r'wins [Bb]est|for [Bb]est')
+for_pat = re.compile(r'for')
+# pre-processing, you can type in each of the list names to see exactly what's being pulled out
+best_split = []
+for i in tweets:
+    split = wins_best.split(i)
+    if len(split) > 1:
+        # print(split)
+        best_split.append("best" + split[1])
 
-# # pre-processing, you can type in each of the list names to see exactly what's being pulled out
-# best_split = []
-# for i in tweets:
-#     split = re.compile(r'wins best').split(i)
-#     if len(split) > 1:
-#         best_split.append(split[1])
-#
-# end_split = []
-# for i in best_split:
-#     split = punctuation.split(i)
-#     end_split.append(split[0])
-#
-# es2 = []
-# for i in end_split:
-#     split = re.compile(r'for').split(i)
-#     es2.append(split[0])
-#
-# no_space = []
-# for i in es2:
-#     if len(i.split()) == 1:
-#         pass
-#     else : no_space.append(i.strip())
-# words = []
-# for i in no_space:
-#     for j in i.split():
-#         words.append(j.lower())
+
+
+
+end_split = []
+for i in best_split:
+    split = end_pat.split(i)
+    # print(split)
+    end_split.append(split[0])
+
+# pprint(end_split)
+# print(len(end_split))
+
+es2 = []
+for i in end_split:
+    split = for_pat.split(i)
+    es2.append(split[0])
+
+
+
+no_space = []
+for i in es2:
+    if len(i.split()) == 1:
+        pass
+    else : no_space.append(i.strip())
+words = []
+for i in no_space:
+    for j in i.split():
+        words.append(j.lower())
+
+
 
 #--------------------------------------------------------------
 
 vectorizer = TfidfVectorizer(use_idf=False, ngram_range=(1,5), max_features=50000)#, sublinear_tf=True)#, stop_words='english')
 
-freq_vects = vectorizer.fit_transform(win)  #win
+freq_vects = vectorizer.fit_transform(end_split)  #win
 
 # true_k is the k-means number
-true_k = 50
+true_k = 35
 model = KMeans(n_clusters=true_k, n_jobs=1, max_iter=100, n_init=1)
 labels = model.fit_predict(freq_vects)
 
 
-catch = [[] for i in range(true_k)]
+clusters = [[] for i in range(true_k)]
 
-for l, t in zip(labels, win):
-    catch[l].append(t)
+for l, t in zip(labels, end_split):
+    clusters[l].append(t)
 
 awards = []
 
-for c in Counter(labels).most_common(true_k):
-    print(c)
-    res = Counter(list(map(classify, catch[c[0]]))).most_common(5)
-    print(res)
-    if res[0][0] == None and len(res) > 1:
-        awards.append(res[1][0])
-    else:
-        awards.append(res[0][0])
-    print("#-------------------------------")
+for c in clusters:
+    # print(get_top_ngrams(c, 10))
+    awards.append(classify(construct_name( [ng[0] for ng in get_top_ngrams(c, 10) if ng[1]>5] )))
+    print("-----------------------")
+
+print(awards)
 print(len(set(awards)))
 
-pprint(awards)
+# for c in Counter(labels).most_common(true_k):
+#     print(c)
+#     res = Counter(list(map(classify, clusters[c[0]]))).most_common(5)
+#     print(res)
+#     if res[0][0] == None and len(res) > 1:
+#         awards.append(res[1][0])
+#     else:
+#         awards.append(res[0][0])
+#     print("#-------------------------------")
+# print(len(set(awards)))
+#
+# pprint(awards)
 
 print(len(vectorizer.get_feature_names()))
 #
