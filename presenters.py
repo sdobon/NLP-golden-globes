@@ -70,7 +70,6 @@ def classify(tweet): #take the intersection of the tweet and each award, return 
 pn2_pat= re.compile("[A-Z][a-z]+ [A-Z]\S+")
 rt = re.compile("rt")
 presenter_pat = re.compile("[Pp]resent|[Pp]resents|[Pp]resenting|[Pp]resenter|[Pp]resented|[Pp]resenter")
-name_pat = re.compile('([A-Z][a-z]+(?:\s[A-Z][a-z]+)*)') #consecutive capital words
 
 #Finding presenters
 all_presenter_pnouns = [[] for a in OFFICIAL_AWARDS] #create lists of all PN2s that show up in classified tweets, mapped to award names
@@ -86,12 +85,12 @@ for t in tweets: #append anything matching presenter_pat to presenter[]
 for p in presenter:
       award = classify(p) #Recall: classify function returns None if no award matches
       if award: 
-            found = name_pat.findall(p)
+            found = pn2_pat.findall(p)
             for f in found:
                   if (movie_db.search_person(f) != []):
                         names.append(f)
             for n in names:
-                  all_nominee_pnouns[OFFICIAL_AWARDS.index(award)].append(n)
+                  all_presenter_pnouns[OFFICIAL_AWARDS.index(award)].append(n)
 
 correct = 0
 for i in range(len(all_presenter_pnouns)):
