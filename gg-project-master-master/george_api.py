@@ -6,6 +6,7 @@ Created on Fri Feb 15 16:02:40 2019
 """
 # import re
 import json
+from pprint import pprint
 # from collections import Counter
 # from textblob import TextBlob
 # from google_images_download import google_images_download
@@ -15,7 +16,7 @@ years = ['2013', '2015']
 for year in years:
     with open('gg_results_%s.json'%year, 'r') as f:
         data = json.load(f)
-        print(data)
+        pprint(data)
 
 
 
