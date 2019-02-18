@@ -1,6 +1,6 @@
 import json
 from pprint import pprint
-import re, nltk, imdb, sys
+import re, nltk, sys
 from nominees_data_and_functions import *
 from collections import Counter
 from answers import answers

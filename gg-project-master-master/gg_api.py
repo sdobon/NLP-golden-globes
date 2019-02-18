@@ -30,10 +30,15 @@ def get_nominees(year):
     '''Nominees is a dictionary with the hard coded award
     names as keys, and each entry a list of strings. Do NOT change
     the name of this function or what it returns.'''
-    # Your code here
-    fres = get_answers(year)
-    nominees = {award: fres['award_data'][award]['nominees'] for award in OFFICIAL_AWARDS_1315}
-    return nominees
+    with open('gg_results_%s.json'%year, 'r') as f:
+        data = json.load(f)
+
+    res = {}
+    for pair in data['award_data'].items():
+        print(pair[1])
+        res[pair[0]] = pair[1]['nominees']
+
+    return res
 
 def get_winner(year):
     '''Winners is a dictionary with the hard coded award

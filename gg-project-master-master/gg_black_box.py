@@ -4,8 +4,10 @@ from sklearn.cluster import KMeans
 from sklearn.metrics import adjusted_rand_score
 
 from pprint import pprint
-import re, nltk, json
+import re, nltk, json, sys
 from collections import Counter
+
+from nominees_data_and_functions import *
 
 from answers import answers
 
@@ -37,6 +39,8 @@ OFFICIAL_AWARDS = ['cecil b. demille award',
 
 
 def voodoo_magic(year, OFFICIAL_AWARDS):
+    # reload(sys)
+    # sys.setdefaultencoding('utf8')
 
     with open('gg%s.json'%year) as f:
         data = json.load(f)
@@ -161,6 +165,7 @@ def voodoo_magic(year, OFFICIAL_AWARDS):
     act_pat = re.compile("act")
     gg_pat = re.compile("GoldenGlobes|[Gg]olden [Gg]lobe")
 
+    present_pat = re.complile("[Pp]resent")
     name_pattern = re.compile(r'\b[A-Z][a-z]*\b(?:\s+[A-Z][a-z]*\b)*')
     name_with_lower = re.compile(r'\b[A-Z][a-z]*\b(?:\s+[a-z]*\b){0,2}(?:\s+[A-Z][a-z]*\b)+')
     pnx_pat= re.compile(r'\b[A-Z]\S+\b(?:\s+[A-Z]\S*\b)*')
@@ -194,6 +199,10 @@ def voodoo_magic(year, OFFICIAL_AWARDS):
 
     best_split = []
 
+    nominee = []
+
+    present = []
+
     #append anything matching filter pats to their catching arrays
     for t in tweets:
         t = re.sub(gg_pat, '', t)
@@ -211,6 +220,13 @@ def voodoo_magic(year, OFFICIAL_AWARDS):
             #----- hosts ---------------------
             if host_pat.search(t):
                 host.append(t)
+            #----- nominees ---------------------
+            if (nominee_pat.search(low) or win_pat.search(low)):
+                #punctuation = re.compile(r'[^\w\s]')
+                nominee.append(t)
+            #------presenters------------------
+            if present_pat.search(low):
+                present.append(t)
 
     #--- additional award names cleaning ----------
     end_split = []
@@ -220,6 +236,44 @@ def voodoo_magic(year, OFFICIAL_AWARDS):
         end_split.append(split[0])
 
     #------------- End Filtering ---------------------------------------------------------
+
+    #------------- Extracting Presenters -----------------------------------------
+
+    # #create lists of all PN2s that show up in classified tweets, mapped to award names
+    # all_present_pnouns = [[] for a in OFFICIAL_AWARDS]
+    #
+    # for t in win:
+    #     award = classify(t)
+    #     # if award == OFFICIAL_AWARDS[13]:
+    #     #     print(t)
+    #     #     print(name_pattern.findall(t))
+    #     #     print(name_with_lower.findall(t))
+    #     #     print('-------------')
+    #     if award:
+    #         name_removed_t = re.sub(removal_patterns[OFFICIAL_AWARDS.index(award)], '', t)
+    #         if act_pat.search(award):
+    #             proper_nouns = pn2_pat.findall(name_removed_t)
+    #         else:
+    #             proper_nouns = name_pattern.findall(name_removed_t)
+    #             proper_nouns += name_with_lower.findall(name_removed_t)
+    #         for n in proper_nouns:
+    #             all_present_pnouns[OFFICIAL_AWARDS.index(award)].append(n)
+    #
+    # for i in range(len(all_present_pnouns)):
+    #     print(OFFICIAL_AWARDS[i])
+    #     results['award_data'][OFFICIAL_AWARDS[i]]['presenters'] = Counter(all_win_pnouns[i]).most_common(3)[0][0].lower()
+    #     try:
+    #         results['award_data'][OFFICIAL_AWARDS[i]]['nominees'].append(Counter(all_win_pnouns[i]).most_common(3)[0][0].lower())
+    #     except:
+    #         results['award_data'][OFFICIAL_AWARDS[i]]['nominees'] = Counter(all_win_pnouns[i]).most_common(3)[0][0].lower()
+    #     if Counter(all_win_pnouns[i]).most_common(3)[0][0].lower()==answers['award_data'][OFFICIAL_AWARDS[i]]['winner']:
+    #         correct += 1
+    #     else:
+    #         print(Counter(all_win_pnouns[i]).most_common(5))  #aggregate PN lists using Counter and show top 3
+    #     print(answers['award_data'][OFFICIAL_AWARDS[i]]['winner']) #pull from answer key
+    #     print("------------------------------------------------")
+
+    #------------- End Ectracting Presenters ---------------------------------------------------------
 
     #------------- Extracting Award Names -----------------------------------------
 
@@ -250,25 +304,25 @@ def voodoo_magic(year, OFFICIAL_AWARDS):
             print("-----------------------")
 
     #-------- Lengthening award names --------
-    lengthen_pats = []
-
-    for a in awards:
-        tokens = a.split()
-        pat_s = tokens[0] + '.*' + tokens[-1]
-        lengthen_pats.append(re.compile(pat_s))
-
-    for p, c, a in zip(lengthen_pats, clusters, awards):
-        print("------------------------------------")
-        print(len(c))
-        # if len(c) < 30:
-        #     print(c)
-        print(a)
-        print("------------------------------------")
-        for t in c:
-            t = t.lower()
-            longer = re.findall(p, t)
-            # if longer:
-            #     print(longer)
+    # lengthen_pats = []
+    #
+    # for a in awards:
+    #     tokens = a.split()
+    #     pat_s = tokens[0] + '.*' + tokens[-1]
+    #     lengthen_pats.append(re.compile(pat_s))
+    #
+    # for p, c, a in zip(lengthen_pats, clusters, awards):
+    #     print("------------------------------------")
+    #     print(len(c))
+    #     # if len(c) < 30:
+    #     #     print(c)
+    #     print(a)
+    #     print("------------------------------------")
+    #     for t in c:
+    #         t = t.lower()
+    #         longer = re.findall(p, t)
+    #         # if longer:
+    #         #     print(longer)
 
     pprint(awards)
     print(len(set(awards)))
@@ -289,6 +343,123 @@ def voodoo_magic(year, OFFICIAL_AWARDS):
 
 
     #--------- End Extracting Hosts ------------------------------------------------
+
+    #--------- Extracting Nominees ------------------------------------------------
+
+    # #create lists of all PN2s that show up in classified tweets, mapped to award names
+    # all_nominee_pnouns = [[] for a in OFFICIAL_AWARDS]
+    #
+    # # Classify the nominee-related tweets by their awards, and
+    # # infer the names in these same tweets
+    # # movie = imdb.IMBd()
+    # for t in nominee:
+    #     # print t
+    #     # print "\n"
+    #     award = classify(t)
+    #     # Recall: classify function returns None if no award matches
+    #     if award:
+    #         # if (t == "Connie Britton should have won best actress #GoldenGlobes"):
+    #         #     print "AWARD: ", award
+    #         # print "AWARD_RELATED TWEET"
+    #         # print t
+    #         # print "\n"
+    #         # print award
+    #         # print "\n"
+    #         # print "\n"
+    #         # print "Tweet: ", t
+    #         # print "Award label: ", award
+    #
+    #         # if the award has to do with an actor / actress...
+    #         if act_pat.search(award) or director_pat.search(award):
+    #             proper_nouns = nominee_pat_1.findall(t)
+    #             for n in proper_nouns:
+    #                 n = n[8:]
+    #                 all_nominee_pnouns[OFFICIAL_AWARDS.index(award)].insert(0,n)
+    #             proper_nouns = nominee_pat_2.findall(t)
+    #             for n in proper_nouns:
+    #                 n = n[0:-14]
+    #                 all_nominee_pnouns[OFFICIAL_AWARDS.index(award)].insert(0,n)
+    #             proper_nouns = nominee_pat_3.findall(t)
+    #             for n in proper_nouns:
+    #                 n = n[0:-11]
+    #                 all_nominee_pnouns[OFFICIAL_AWARDS.index(award)].insert(0,n)
+    #             proper_nouns = nominee_pat_4.findall(t)
+    #             for n in proper_nouns:
+    #                 n = n[0:(n.find("did")-1)]
+    #                 all_nominee_pnouns[OFFICIAL_AWARDS.index(award)].insert(0,n)
+    #             proper_nouns = nominee_pat_5.findall(t)
+    #             for n in proper_nouns:
+    #                 n = n[7:-7]
+    #                 all_nominee_pnouns[OFFICIAL_AWARDS.index(award)].insert(0,n)
+    #             proper_nouns = nominee_pat_6.findall(t)
+    #             for n in proper_nouns:
+    #                 n = n[(n.find("been")+5):]
+    #                 all_nominee_pnouns[OFFICIAL_AWARDS.index(award)].insert(0,n)
+    #             proper_nouns = nominee_pat_7.findall(t)
+    #             for n in proper_nouns:
+    #                 n = n[0:(n.find("should")-1)]
+    #                 all_nominee_pnouns[OFFICIAL_AWARDS.index(award)].insert(0,n)
+    #             if (all_nominee_pnouns[OFFICIAL_AWARDS.index(award)]):
+    #                 all_nominee_pnouns[OFFICIAL_AWARDS.index(award)] = list(set(all_nominee_pnouns[OFFICIAL_AWARDS.index(award)]))
+    #
+    #         # if the award doesn't have to do with an actor...
+    #         else:
+    #             proper_nouns = nominee_pat_8.findall(t)
+    #             for n in proper_nouns:
+    #                 n = n[8:]
+    #                 if not unneeded_stuff.findall(n) and n != "It" and n != "That":
+    #                     all_nominee_pnouns[OFFICIAL_AWARDS.index(award)].insert(0,n)
+    #             proper_nouns = nominee_pat_9.findall(t)
+    #             for n in proper_nouns:
+    #                 n = n[0:-14]
+    #                 if not unneeded_stuff.findall(n) and n != "It" and n != "That":
+    #                     all_nominee_pnouns[OFFICIAL_AWARDS.index(award)].insert(0,n)
+    #             proper_nouns = nominee_pat_10.findall(t)
+    #             for n in proper_nouns:
+    #                 n = n[0:-11]
+    #                 if not unneeded_stuff.findall(n):
+    #                     all_nominee_pnouns[OFFICIAL_AWARDS.index(award)].insert(0,n)
+    #             proper_nouns = nominee_pat_11.findall(t)
+    #             for n in proper_nouns:
+    #                 n = n[0:(n.find("did")-1)]
+    #                 if not unneeded_stuff.findall(n) and n != "It" and n != "That":
+    #                     all_nominee_pnouns[OFFICIAL_AWARDS.index(award)].insert(0,n)
+    #             proper_nouns = nominee_pat_12.findall(t)
+    #             for n in proper_nouns:
+    #                 n = n[7:-7]
+    #                 if not unneeded_stuff.findall(n) and n != "It" and n != "That":
+    #                     all_nominee_pnouns[OFFICIAL_AWARDS.index(award)].insert(0,n)
+    #             proper_nouns = nominee_pat_13.findall(t)
+    #             for n in proper_nouns:
+    #                 n = n[(n.find("been")+5):]
+    #                 if not unneeded_stuff.findall(n) and n != "It" and n != "That":
+    #                     all_nominee_pnouns[OFFICIAL_AWARDS.index(award)].insert(0,n)
+    #             proper_nouns = nominee_pat_14.findall(t)
+    #             for n in proper_nouns:
+    #                 n = n[0:(n.find("should")-1)]
+    #                 if not unneeded_stuff.findall(n) and n != "It" and n != "That":
+    #                     all_nominee_pnouns[OFFICIAL_AWARDS.index(award)].insert(0,n)
+    #             if (all_nominee_pnouns[OFFICIAL_AWARDS.index(award)]):
+    #                 all_nominee_pnouns[OFFICIAL_AWARDS.index(award)] = list(set(all_nominee_pnouns[OFFICIAL_AWARDS.index(award)]))
+    #
+    # print ("******************************************")
+    # correct = 0
+    # for i in range(1,len(all_nominee_pnouns)):
+    #     # print(OFFICIAL_AWARDS[i])
+    #     # if Counter(all_nominee_pnouns[i]).most_common(3)[0][0].lower()==answers['award_data'][OFFICIAL_AWARDS[i]]['nominees']:
+    #     #     correct += 1
+    #     # else:
+    #     results['award_data'][OFFICIAL_AWARDS[i]]['nominees'] = all_nominee_pnouns[i][0:4]
+    #     # print "Award: ", OFFICIAL_AWARDS[i]
+    #     # # print "Our answer: ", (Counter(all_nominee_pnouns[i]).most_common(5))  #aggregate PN lists using Counter and show top 3
+    #     # print "Our answer: ", all_nominee_pnouns[i][0:4]
+    #     # print "Desired answer:", (answers['award_data'][OFFICIAL_AWARDS[i]]['nominees']) #pull from answer key
+    #     # print "\n"
+    #
+    # # print("Correctly extracting " + str(correct) + " of " + str(len(OFFICIAL_AWARDS)) + " awards")
+
+
+    #--------- End Extracting nominees ------------------------------------------------
 
     #--------- Extracting Winners --------------------------------------------------
 
@@ -317,6 +488,10 @@ def voodoo_magic(year, OFFICIAL_AWARDS):
     for i in range(len(all_win_pnouns)):
         print(OFFICIAL_AWARDS[i])
         results['award_data'][OFFICIAL_AWARDS[i]]['winner'] = Counter(all_win_pnouns[i]).most_common(3)[0][0].lower()
+        try:
+            results['award_data'][OFFICIAL_AWARDS[i]]['nominees'].append(Counter(all_win_pnouns[i]).most_common(3)[0][0].lower())
+        except:
+            results['award_data'][OFFICIAL_AWARDS[i]]['nominees'] = Counter(all_win_pnouns[i]).most_common(3)[0][0].lower()
         if Counter(all_win_pnouns[i]).most_common(3)[0][0].lower()==answers['award_data'][OFFICIAL_AWARDS[i]]['winner']:
             correct += 1
         else:
