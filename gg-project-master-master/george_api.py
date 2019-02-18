@@ -11,12 +11,17 @@ from pprint import pprint
 # from textblob import TextBlob
 # from google_images_download import google_images_download
 
-years = ['2013', '2015']
+import gg_api
 
-for year in years:
-    with open('gg_results_%s.json'%year, 'r') as f:
-        data = json.load(f)
-        pprint(data)
+print(gg_api.get_hosts('2013'))
+print(gg_api.get_winner('2013'))
+
+# years = ['2013', '2015']
+#
+# for year in years:
+#     with open('gg_results_%s.json'%year, 'r') as f:
+#         data = json.load(f)
+#         pprint(data)
 
 
 
