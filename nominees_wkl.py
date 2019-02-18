@@ -147,7 +147,7 @@ for i in range(1,len(all_nominee_pnouns)):
     # else:
     print "Award: ", OFFICIAL_AWARDS[i]
     # print "Our answer: ", (Counter(all_nominee_pnouns[i]).most_common(5))  #aggregate PN lists using Counter and show top 3
-    print "Our answer: ", all_nominee_pnouns[i][0:4]
+    print "Our answer: ", all_nominee_pnouns[i][0:5]
     print "Desired answer:", (answers['award_data'][OFFICIAL_AWARDS[i]]['nominees']) #pull from answer key
     print "\n"
 
