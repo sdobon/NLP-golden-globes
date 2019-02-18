@@ -9,7 +9,31 @@ from collections import Counter
 
 from answers import answers
 
-OFFICIAL_AWARDS_13 = ['cecil b. demille award', 'best motion picture - drama', 'best performance by an actress in a motion picture - drama', 'best performance by an actor in a motion picture - drama', 'best motion picture - comedy or musical', 'best performance by an actress in a motion picture - comedy or musical', 'best performance by an actor in a motion picture - comedy or musical', 'best animated feature film', 'best foreign language film', 'best performance by an actress in a supporting role in a motion picture', 'best performance by an actor in a supporting role in a motion picture', 'best director - motion picture', 'best screenplay - motion picture', 'best original score - motion picture', 'best original song - motion picture', 'best television series - drama', 'best performance by an actress in a television series - drama', 'best performance by an actor in a television series - drama', 'best television series - comedy or musical', 'best performance by an actress in a television series - comedy or musical', 'best performance by an actor in a television series - comedy or musical', 'best mini-series or motion picture made for television', 'best performance by an actress in a mini-series or motion picture made for television', 'best performance by an actor in a mini-series or motion picture made for television', 'best performance by an actress in a supporting role in a series, mini-series or motion picture made for television', 'best performance by an actor in a supporting role in a series, mini-series or motion picture made for television']
+OFFICIAL_AWARDS = ['cecil b. demille award',
+                   'best motion picture - drama',
+                   'best performance by an actress in a motion picture - drama',
+                   'best performance by an actor in a motion picture - drama',
+                   'best motion picture - comedy or musical',
+                   'best performance by an actress in a motion picture - comedy or musical',
+                   'best performance by an actor in a motion picture - comedy or musical',
+                   'best animated feature film',
+                   'best foreign language film',
+                   'best performance by an actress in a supporting role in a motion picture',
+                   'best performance by an actor in a supporting role in a motion picture',
+                   'best director - motion picture', 'best screenplay - motion picture',
+                   'best original score - motion picture',
+                   'best original song - motion picture',
+                   'best television series - drama',
+                   'best performance by an actress in a television series - drama',
+                   'best performance by an actor in a television series - drama',
+                   'best television series - comedy or musical',
+                   'best performance by an actress in a television series - comedy or musical',
+                   'best performance by an actor in a television series - comedy or musical',
+                   'best mini-series or motion picture made for television',
+                   'best performance by an actress in a mini-series or motion picture made for television',
+                   'best performance by an actor in a mini-series or motion picture made for television',
+                   'best performance by an actress in a supporting role in a series, mini-series or motion picture made for television',
+                   'best performance by an actor in a supporting role in a series, mini-series or motion picture made for television']
 
 
 def voodoo_magic(year, OFFICIAL_AWARDS):
@@ -84,6 +108,8 @@ def voodoo_magic(year, OFFICIAL_AWARDS):
     def merge_overlap(a, b):
         c = a.split()
         d = b.split()
+        if set(c) == set(d):
+            return None
         if c[-1] == d[0]:
             final = c + d[1:]
         elif d[-1] == c[0]:
@@ -109,25 +135,20 @@ def voodoo_magic(year, OFFICIAL_AWARDS):
                 return construct_name( [merge] + lst)
         return s
 
+    def  best_to_front(lst):
+        for s in lst:
+            if s.split()[0] == 'best':
+                pop = lst.pop(lst.index(s))
+                return [pop] + lst
+        return []
+
+
     # print(construct_name(['best supporting', 'supporting actor','best supporting actor', 'actor in', 'supporting actor in', 'in drama']))
 
 
 
     #-----------------------------------------------------------------------------------------------
 
-
-    # # Make a set of all the words in OFFICIAL_AWARDS
-    # award_words = set()
-    # for a in OFFICIAL_AWARDS:
-    #     for w in tokenize(a):
-    #         if len(w) <= 3:pass
-    #         if w == "award": pass
-    #         else:
-    #             award_words.add(w)
-    #
-    #
-    # print(award_words)
-    # print(len(award_words))
 
 
     #-------- Compiled Regex Patterns ----------------------------------------------------------
@@ -138,6 +159,7 @@ def voodoo_magic(year, OFFICIAL_AWARDS):
     rt = re.compile("rt")
     award_related_pat = re.compile("best.*actress.*television.*drama")
     act_pat = re.compile("act")
+    gg_pat = re.compile("GoldenGlobes|[Gg]olden [Gg]lobe")
 
     name_pattern = re.compile(r'\b[A-Z][a-z]*\b(?:\s+[A-Z][a-z]*\b)*')
     name_with_lower = re.compile(r'\b[A-Z][a-z]*\b(?:\s+[a-z]*\b){0,2}(?:\s+[A-Z][a-z]*\b)+')
@@ -148,7 +170,7 @@ def voodoo_magic(year, OFFICIAL_AWARDS):
 
     # ----- Award names helper Functions -------------
 
-    end_pat = re.compile(r' for | at |\.|:|#|!')
+    end_pat = re.compile(r' for | at | goes |http|@|\.|:|#|!|"')
     wins_best = re.compile(r'wins [Bb]est|for [Bb]est')
     for_pat = re.compile(r'for')
 
@@ -174,6 +196,7 @@ def voodoo_magic(year, OFFICIAL_AWARDS):
 
     #append anything matching filter pats to their catching arrays
     for t in tweets:
+        t = re.sub(gg_pat, '', t)
         # ---- award names -------------
         split = wins_best.split(t)
         if len(split) > 1:
@@ -218,13 +241,36 @@ def voodoo_magic(year, OFFICIAL_AWARDS):
     awards = []
 
     for c in clusters:
-        name = construct_name( [ng[0] for ng in get_top_ngrams(c, 10) if ng[1]>5] )
+        name = construct_name( best_to_front( [ng[0] for ng in get_top_ngrams(c, 10) if ng[1]>5] ) )
         # print(get_top_ngrams(c, 10))
         if name:
             awards.append(name)
+            print(get_top_ngrams(c, 10))
+            print(name)
             print("-----------------------")
 
-    print(awards)
+    #-------- Lengthening award names --------
+    lengthen_pats = []
+
+    for a in awards:
+        tokens = a.split()
+        pat_s = tokens[0] + '.*' + tokens[-1]
+        lengthen_pats.append(re.compile(pat_s))
+
+    for p, c, a in zip(lengthen_pats, clusters, awards):
+        print("------------------------------------")
+        print(len(c))
+        # if len(c) < 30:
+        #     print(c)
+        print(a)
+        print("------------------------------------")
+        for t in c:
+            t = t.lower()
+            longer = re.findall(p, t)
+            # if longer:
+            #     print(longer)
+
+    pprint(awards)
     print(len(set(awards)))
     results['award_names'] = awards
     #---------- End Extracting Award Names --------------------------------------
