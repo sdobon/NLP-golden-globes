@@ -107,7 +107,7 @@ def main(year):
     with open('data' + str(year) + '.json', 'w') as outfile:  
         json.dump(json_i, outfile)
 # BEGINNING OF EXTRAS -------------------------------------------------
-    print('\nBEGINNING OF EXTRAS: \n")
+    print('\nBEGINNING OF EXTRAS: \n')
     dress = re.compile("best dressed")
     dressed = []
     for t in tweets:
