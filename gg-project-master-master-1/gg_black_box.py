@@ -5,7 +5,6 @@ from sklearn.metrics import adjusted_rand_score
 
 from pprint import pprint
 import re, nltk, json, sys
-import answers as answers
 from collections import Counter
 
 from nominees_data_and_functions import *
@@ -245,7 +244,7 @@ def voodoo_magic(year, OFFICIAL_AWARDS):
 
      #create lists of all PN2s that show up in classified tweets, mapped to award names
     all_present_pnouns = [[] for a in OFFICIAL_AWARDS]
-    
+
     for t in present:
         award = classify(t)
          # if award == OFFICIAL_AWARDS[13]:
@@ -262,7 +261,7 @@ def voodoo_magic(year, OFFICIAL_AWARDS):
                 proper_nouns += name_with_lower.findall(name_removed_t)
             for n in proper_nouns:
                 all_present_pnouns[OFFICIAL_AWARDS.index(award)].append(n)
-    
+
     for i in range(len(OFFICIAL_AWARDS)):
         results['award_data'][OFFICIAL_AWARDS[i]]['presenters'] = []
     for i in range(len(all_present_pnouns)):
@@ -273,7 +272,7 @@ def voodoo_magic(year, OFFICIAL_AWARDS):
                 else:
                    results['award_data'][OFFICIAL_AWARDS[i]]['presenters'] = [Counter(all_present_pnouns[i]).most_common(2)[0][0].lower()]
                    results['award_data'][OFFICIAL_AWARDS[i]]['presenters'].append(Counter(all_present_pnouns[i]).most_common(2)[1][0].lower())
-            
+
 #            results['award_data'][OFFICIAL_AWARDS[i]]['presenters'] = Counter(all_present_pnouns[i]).most_common(2)[0][0].lower()
 #            try:
 #                results['award_data'][OFFICIAL_AWARDS[i]]['nominees'].append(Counter(all_present_pnouns[i]).most_common(2)[0][0].lower())
@@ -360,11 +359,11 @@ def voodoo_magic(year, OFFICIAL_AWARDS):
 
      #create lists of all PN2s that show up in classified tweets, mapped to award names
     all_nominee_pnouns = [[] for a in OFFICIAL_AWARDS]
-    
+
      # Classify the nominee-related tweets by their awards, and
      # infer the names in these same tweets
      # movie = imdb.IMBd()
-    
+
     for t in nominee:
          # print t
          # print "\n"
@@ -381,7 +380,7 @@ def voodoo_magic(year, OFFICIAL_AWARDS):
              # print "\n"
              # print "Tweet: ", t
              # print "Award label: ", award
-    
+
              # if the award has to do with an actor / actress...
             if act_pat.search(award) or director_pat.search(award):
                 proper_nouns = nominee_pat_1.findall(t)
@@ -469,7 +468,7 @@ def voodoo_magic(year, OFFICIAL_AWARDS):
          # print "Our answer: ", all_nominee_pnouns[i][0:4]
          # print "Desired answer:", (answers['award_data'][OFFICIAL_AWARDS[i]]['nominees']) #pull from answer key
          # print "\n"
-    
+
      # print("Correctly extracting " + str(correct) + " of " + str(len(OFFICIAL_AWARDS)) + " awards")
 
 
