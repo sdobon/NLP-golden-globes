@@ -1,10 +1,9 @@
 # -*- coding: utf-8 -*-
 """
 Created on Fri Feb 15 16:02:40 2019
-
 @author: georg
 """
-# import re
+import re
 import json
 from collections import Counter
 from textblob import TextBlob
@@ -12,8 +11,8 @@ from google_images_download import google_images_download
 
 import gg_api
 
-print(gg_api.get_hosts('2013'))
-print(gg_api.get_winner('2013'))
+#print(gg_api.get_hosts('2013'))
+#print(gg_api.get_winner('2013'))
 
 # years = ['2013', '2015']
 #
@@ -44,14 +43,13 @@ OFFICIAL_AWARDS_1819 = ['best motion picture - drama', 'best motion picture - mu
 #
  # main takes in the year and prints the human readable format and stores the json format in an object called "ans_json"
 def main(year):
+     year = int(year)
      hosts = gg_api.get_hosts(year)
      awards = gg_api.get_awards(year)
      presenters = gg_api.get_presenters(year)
      winner = gg_api.get_winner(year)
      nominees = gg_api.get_nominees(year)
-     if year == 2013:
-         OFFICIAL_AWARDS = OFFICIAL_AWARDS_1315
-     elif year == 2015:
+     if year < 2016:
          OFFICIAL_AWARDS = OFFICIAL_AWARDS_1315
      else:
          OFFICIAL_AWARDS = OFFICIAL_AWARDS_1819

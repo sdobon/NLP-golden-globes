@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Sun Feb 17 21:42:50 2019
+
+@author: georg
+"""
+
 '''
 Version 0.6
 Python 3
@@ -10,7 +17,6 @@ from collections import Counter
 
 from nltk.metrics import edit_distance
 
-# import gg_apifake as gg_api
 import gg_api
 
 global toMovie
