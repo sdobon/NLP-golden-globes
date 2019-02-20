@@ -83,7 +83,10 @@ def main():
     what it returns.'''
     years = ['2013', '2015']
     for year in years:
-        results = gg_black_box.voodoo_magic(year, OFFICIAL_AWARDS_1315)
+        if year in ['2013', '2015']:
+            results = gg_black_box.voodoo_magic(year, OFFICIAL_AWARDS_1315)
+        elif year in ['2018', '2019']:
+            results = gg_black_box.voodoo_magic(year, OFFICIAL_AWARDS_1819)
         with open('gg_results_%s.json'%year, 'w') as f:
             f.write(json.dumps(results))
         #print(get_hosts('2013'))
